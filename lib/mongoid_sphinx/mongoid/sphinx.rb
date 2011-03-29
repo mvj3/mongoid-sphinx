@@ -96,6 +96,7 @@ module Mongoid
         client = MongoidSphinx::Configuration.instance.client
 
         client.match_mode = options[:match_mode] || :extended
+        client.offset = options[:offset] if options.key?(:offset)
         client.limit = options[:limit] if options.key?(:limit)
         client.max_matches = options[:max_matches] if options.key?(:max_matches)
 
