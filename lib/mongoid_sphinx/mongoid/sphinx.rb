@@ -118,17 +118,7 @@ module Mongoid
         end
 
         result = client.query("#{query} @classname #{self.to_s}")
-
-        if result and result[:status] == 0 and (matches = result[:matches])
-          ids = matches.collect do |row|
-            (100000000000000000000000 + row[:doc]).to_s rescue nil
-          end.compact
-
-          return ids if options[:raw] or ids.empty?
-          return self.find(ids)
-        else
-          return []
-        end
+        MongoidSphinx::Search.new(self, result)
       end
     end
 
