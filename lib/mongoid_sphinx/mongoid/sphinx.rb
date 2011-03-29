@@ -14,14 +14,14 @@ module Mongoid
         'BigDecimal' => 'float',
         'Boolean' => 'bool'
       }
-      
+
       cattr_accessor :search_fields
       cattr_accessor :search_attributes
       cattr_accessor :index_options
     end
-    
+
     module ClassMethods
-      
+
       def search_index(options={})
         self.search_fields = options[:fields]
         self.search_attributes = {}
@@ -29,28 +29,28 @@ module Mongoid
         options[:attributes].each do |attrib|
           self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[self.fields[attrib.to_s].type.to_s] || 'str2ordinal'
         end
-        
+
         MongoidSphinx.context.add_indexed_model self
       end
-      
+
       def internal_sphinx_index
         MongoidSphinx::Index.new(self)
       end
-      
+
       def has_sphinx_indexes?
         self.search_fields && self.search_fields.length > 0
       end
-      
+
       def to_riddle
         self.internal_sphinx_index.to_riddle
       end
-      
+
       def sphinx_stream
         STDOUT.sync = true # Make sure we really stream..
-        
+
         puts '<?xml version="1.0" encoding="utf-8"?>'
         puts '<sphinx:docset>'
-        
+
         # Schema
         puts '<sphinx:schema>'
         puts '<sphinx:field name="classname"/>'
@@ -61,16 +61,16 @@ module Mongoid
           puts "<sphinx:attr name=\"#{key}\" type=\"#{value}\"/>"
         end
         puts '</sphinx:schema>'
-        
+
         self.all.each do |document|
           sphinx_compatible_id = document['_id'].to_s.to_i - 100000000000000000000000
           if sphinx_compatible_id > 0
             puts "<sphinx:document id=\"#{sphinx_compatible_id}\">"
-            
+
             puts "<classname>#{self.to_s}</classname>"
             self.search_fields.each do |key|
               if document.respond_to?(key.to_sym)
-                puts "<#{key}><![CDATA[#{document.send(key.to_s)}]]></#{key}>"
+                puts "<#{key}>#{document.send(key.to_s).to_s.to_xs}></#{key}>"
               end
             end
             self.search_attributes.each do |key, value|
@@ -81,48 +81,48 @@ module Mongoid
                   document[key.to_s].to_i
                 else
                   document[key.to_s].to_s
-              end 
-              puts "<#{key}>#{value}</#{key}>"
+              end
+              puts "<#{key}>#{value.to_xs}</#{key}>"
             end
-            
+
             puts '</sphinx:document>'
           end
         end
-        
+
         puts '</sphinx:docset>'
       end
-      
+
       def search(query, options = {})
         client = MongoidSphinx::Configuration.instance.client
-        
+
         client.match_mode = options[:match_mode] || :extended
         client.limit = options[:limit] if options.key?(:limit)
         client.max_matches = options[:max_matches] if options.key?(:max_matches)
-        
+
         if options.key?(:sort_by)
           client.sort_mode = :extended
           client.sort_by = options[:sort_by]
         end
-        
+
         if options.key?(:with)
           options[:with].each do |key, value|
             client.filters << Riddle::Client::Filter.new(key.to_s, value.is_a?(Range) ? value : value.to_a, false)
           end
         end
-        
+
         if options.key?(:without)
           options[:without].each do |key, value|
             client.filters << Riddle::Client::Filter.new(key.to_s, value.is_a?(Range) ? value : value.to_a, true)
           end
         end
-        
+
         result = client.query("#{query} @classname #{self.to_s}")
-        
+
         if result and result[:status] == 0 and (matches = result[:matches])
           ids = matches.collect do |row|
             (100000000000000000000000 + row[:doc]).to_s rescue nil
           end.compact
-          
+
           return ids if options[:raw] or ids.empty?
           return self.find(ids)
         else
@@ -130,6 +130,6 @@ module Mongoid
         end
       end
     end
-    
+
   end
 end
