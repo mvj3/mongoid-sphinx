@@ -29,7 +29,7 @@ module MongoidSphinx
     end
 
     def document_map
-      @document_map = model.find(document_ids).inject({}) { |memo, d| memo[d.id] = d; memo }
+      @document_map = model.find(document_ids).inject({}) { |memo, d| memo[d.id.to_s] = d; memo }
     end
 
     def total_pages
