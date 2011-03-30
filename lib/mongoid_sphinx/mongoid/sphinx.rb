@@ -5,15 +5,17 @@ module Mongoid
   module Sphinx
     extend ActiveSupport::Concern
     included do
-      SPHINX_TYPE_MAPPING = {
-        'Date' => 'timestamp',
-        'DateTime' => 'timestamp',
-        'Time' => 'timestamp',
-        'Float' => 'float',
-        'Integer' => 'int',
-        'BigDecimal' => 'float',
-        'Boolean' => 'bool'
-      }
+      unless defined?(SPHINX_TYPE_MAPPING)
+        SPHINX_TYPE_MAPPING = {
+          'Date' => 'timestamp',
+          'DateTime' => 'timestamp',
+          'Time' => 'timestamp',
+          'Float' => 'float',
+          'Integer' => 'int',
+          'BigDecimal' => 'float',
+          'Boolean' => 'bool'
+        }
+      end
 
       cattr_accessor :search_fields
       cattr_accessor :search_attributes
