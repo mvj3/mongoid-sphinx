@@ -11,8 +11,8 @@ module MongoidSphinx
     end
 
     def each_match_with_result
-      documents.each_with_index do |document, index|
-        yield matches[index], document
+      matches.each_with_index do |match, index|
+        yield match, document_map[document_ids[index]]
       end
     end
     alias :each_hit_with_result :each_match_with_result
@@ -23,13 +23,13 @@ module MongoidSphinx
     alias :hits :matches
 
     def document_ids
-      @document_ids ||= matches.collect do |row|
-        (100000000000000000000000 + row[:doc]).to_s rescue nil
-      end.compact
+      @document_ids ||= matches.collect do |match|
+        (100000000000000000000000 + match[:doc]).to_s
+      end
     end
 
-    def documents
-      @documents ||= model.find(document_ids)
+    def document_map
+      @document_map = model.find(document_ids).inject({}) { |memo, d| memo[d.id] = d; memo }
     end
 
     def total_pages
