@@ -96,9 +96,11 @@ module Mongoid
         client = MongoidSphinx::Configuration.instance.client
 
         client.match_mode = options[:match_mode] || :extended
-        client.offset = options[:offset] if options.key?(:offset)
-        client.limit = options[:limit] if options.key?(:limit)
-        client.max_matches = options[:max_matches] if options.key?(:max_matches)
+        client.offset = options[:offset].to_i if options.key?(:offset)
+        client.limit = options[:limit].to_i if options.key?(:limit)
+        client.limit = options[:per_page].to_i if options.key?(:per_page)
+        client.offset = (options[:page].to_i - 1) * client.limit if options[:page]
+        client.max_matches = options[:max_matches].to_i if options.key?(:max_matches)
 
         if options.key?(:sort_by)
           client.sort_mode = :extended
@@ -118,7 +120,7 @@ module Mongoid
         end
 
         result = client.query("#{query} @classname #{self.to_s}")
-        MongoidSphinx::Search.new(self, result)
+        MongoidSphinx::Search.new(client, self, result)
       end
     end
 
