@@ -102,6 +102,7 @@ module Mongoid
         client.limit = options[:per_page].to_i if options.key?(:per_page)
         client.offset = (options[:page].to_i - 1) * client.limit if options[:page]
         client.max_matches = options[:max_matches].to_i if options.key?(:max_matches)
+        client.set_anchor(*options[:geo_anchor]) if options.key?(:geo_anchor)
 
         if options.key?(:sort_by)
           client.sort_mode = :extended
