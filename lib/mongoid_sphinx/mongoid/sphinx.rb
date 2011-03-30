@@ -28,7 +28,7 @@ module Mongoid
         self.index_options = options[:options] || {}
         attribute_types = options[:attribute_types] || {}
         options[:attributes].each do |attrib|
-          attr_type = attribute_types[attrib] || self.fields[attrib.to_s].type.to_s
+          attr_type = attribute_types[attrib].to_s || self.fields[attrib.to_s].type.to_s
           self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[attr_type] || 'str2ordinal'
         end
         MongoidSphinx.context.add_indexed_model self
@@ -55,8 +55,8 @@ module Mongoid
         # Schema
         puts '<sphinx:schema>'
         puts '<sphinx:field name="classname"/>'
-        self.search_fields.each do |key, value|
-          puts "<sphinx:field name=\"#{key}\"/>"
+        self.search_fields.each do |name|
+          puts "<sphinx:field name=\"#{name}\"/>"
         end
         self.search_attributes.each do |key, value|
           puts "<sphinx:attr name=\"#{key}\" type=\"#{value}\"/>"
@@ -71,19 +71,19 @@ module Mongoid
             puts "<classname>#{self.to_s}</classname>"
             self.search_fields.each do |key|
               if document.respond_to?(key.to_sym)
-                puts "<#{key}>#{document.send(key.to_s).to_s.to_xs}></#{key}>"
+                puts "<#{key}>#{document.send(key).to_s.to_xs}</#{key}>"
               end
             end
             self.search_attributes.each do |key, value|
               value = case value
                 when 'bool'
-                  document[key.to_s] ? 1 : 0
+                  document.send(key) ? 1 : 0
                 when 'timestamp'
-                  document[key.to_s].to_i
+                  document.send(key).to_i
                 else
-                  document[key.to_s].to_s
+                  document.send(key)
               end
-              puts "<#{key}>#{value.to_xs}</#{key}>"
+              puts "<#{key}>#{value.to_s.to_xs}</#{key}>"
             end
 
             puts '</sphinx:document>'
