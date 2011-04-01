@@ -5,19 +5,19 @@ $:.unshift lib unless $:.include?(lib)
 require "mongoid_sphinx/version"
 
 Gem::Specification.new do |s|
-  s.name        = "mongoid-sphinx"
+  s.name        = "mongoid-sphinx-huacnlee"
   s.version     = MongoidSphinx::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Hodgson"]
   s.email       = ["mhodgson@redbeard-tech.com"]
-  s.homepage    = "http://github.com/redbeard-tech/mongoid-sphinx"
+  s.homepage    = "http://github.com/huacnlee/mongoid-sphinx"
   s.summary     = "A full text indexing extension for MongoDB using Sphinx and Mongoid."
   s.description = "A full text indexing extension for MongoDB using Sphinx and Mongoid."
 
   s.required_rubygems_version = ">= 1.3.6"
 
-  s.add_dependency("mongoid", [">= 2.0.0.beta.19"])
-  s.add_dependency("riddle", ["~> 1.1.0"])
+  s.add_dependency("mongoid", [">= 2.0.0"])
+  s.add_dependency("riddle", ["~> 1.2.2"])
 
   s.files        = Dir.glob("lib/**/*") + %w(README.markdown)
   s.require_path = 'lib'

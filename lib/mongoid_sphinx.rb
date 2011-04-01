@@ -1,5 +1,6 @@
 require "mongoid"
 require "riddle"
+require "riddle/1.10"
 
 require 'mongoid_sphinx/configuration'
 require 'mongoid_sphinx/context'

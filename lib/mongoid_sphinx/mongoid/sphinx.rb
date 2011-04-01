@@ -66,30 +66,28 @@ module Mongoid
         puts '</sphinx:schema>'
 
         self.all.each do |document|
-          sphinx_compatible_id = document['_id'].to_s.to_i - 100000000000000000000000
-          if sphinx_compatible_id > 0
-            puts "<sphinx:document id=\"#{sphinx_compatible_id}\">"
+          sphinx_compatible_id = document['_id'].to_s
+					puts "<sphinx:document id=\"#{sphinx_compatible_id}\">"
 
-            puts "<classname>#{self.to_s}</classname>"
-            self.search_fields.each do |key|
-              if document.respond_to?(key.to_sym)
-                puts "<#{key}>#{document.send(key).to_s.to_xs}</#{key}>"
-              end
-            end
-            self.search_attributes.each do |key, value|
-              value = case value
-                when 'bool'
-                  document.send(key) ? 1 : 0
-                when 'timestamp'
-                  document.send(key).to_i
-                else
-                  document.send(key)
-              end
-              puts "<#{key}>#{value.to_s.to_xs}</#{key}>"
-            end
+					puts "<classname>#{self.to_s}</classname>"
+					self.search_fields.each do |key|
+						if document.respond_to?(key.to_sym)
+							puts "<#{key}>#{document.send(key).to_s.to_xs}</#{key}>"
+						end
+					end
+					self.search_attributes.each do |key, value|
+						value = case value
+							when 'bool'
+								document.send(key) ? 1 : 0
+							when 'timestamp'
+								document.send(key).to_i
+							else
+								document.send(key)
+						end
+						puts "<#{key}>#{value.to_s.to_xs}</#{key}>"
+					end
 
-            puts '</sphinx:document>'
-          end
+					puts '</sphinx:document>'
         end
 
         puts '</sphinx:docset>'
