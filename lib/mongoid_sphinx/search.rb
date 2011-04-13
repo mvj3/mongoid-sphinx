@@ -49,5 +49,14 @@ module MongoidSphinx
     def next_page
       current_page == total_pages ? nil : current_page + 1
     end
+
+		def to_a
+			model.find(ids)
+		end
+
+		def method_missing(method, *args, &block)
+			to_a.send(method,*args,&block)
+		end
+
   end
 end
