@@ -35,9 +35,19 @@ module Mongoid
         end
         MongoidSphinx.context.add_indexed_model self
       end
-
-			def generate_id(created_at)
-				return created_at.to_i
+			
+			def generate_id(object_id)
+				@@exist_ids ||= []
+				id = object_id.to_s[0,8].hex
+				while true
+					if @@exist_ids.include? id
+						id += 1
+					else
+						break
+					end
+				end
+				@@exist_ids << id
+				return id
 			end
 
       def internal_sphinx_index
@@ -71,7 +81,7 @@ module Mongoid
         puts '</sphinx:schema>'
 
         self.all.each do |document|
-          sphinx_compatible_id = self.generate_id(document['created_at'])
+          sphinx_compatible_id = self.generate_id(document['_id'])
 					puts "<sphinx:document id=\"#{sphinx_compatible_id}\">"
 
 					puts "<classname>#{self.to_s}</classname>"
