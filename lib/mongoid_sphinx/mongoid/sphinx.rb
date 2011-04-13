@@ -13,7 +13,10 @@ module Mongoid
           'Float' => 'float',
           'Integer' => 'int',
           'BigDecimal' => 'float',
-          'Boolean' => 'bool'
+          'Boolean' => 'bool',
+					'String' => 'string',
+					'Object' => 'string',
+					'Array' => 'string'
         }
       end
 
@@ -30,8 +33,8 @@ module Mongoid
         self.index_options = options[:options] || {}
         attribute_types = options[:attribute_types] || {}
         options[:attributes].each do |attrib|
-          attr_type = attribute_types[attrib].to_s || self.fields[attrib.to_s].type.to_s
-          self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[attr_type] || 'string'
+          attr_type = attribute_types[attrib] || self.fields[attrib.to_s].type
+          self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[attr_type.to_s] || 'str2ordinal'
         end
         MongoidSphinx.context.add_indexed_model self
       end
@@ -76,7 +79,7 @@ module Mongoid
         end
 				puts "<sphinx:attr name=\"_id\" type=\"string\" />"
         self.search_attributes.each do |key, value|
-          puts "<sphinx:attr name=\"#{key}\" type=\"#{value}\"/>"
+          puts "<sphinx:attr name=\"#{key}\" type=\"#{value}\" />"
         end
         puts '</sphinx:schema>'
 
@@ -85,13 +88,16 @@ module Mongoid
 					puts "<sphinx:document id=\"#{sphinx_compatible_id}\">"
 
 					puts "<classname>#{self.to_s}</classname>"
+					puts "<_id>#{document.send("_id")}</_id>"
 					self.search_fields.each do |key|
 						if document.respond_to?(key.to_sym)
-							puts "<#{key}>#{document.send(key).to_s.to_xs}</#{key}>"
+							value = document.send(key)
+							value = value.join(",") if value.class == [].class
+							puts "<#{key}>#{value.to_s.to_xs}</#{key}>"
 						end
 					end
-					puts "<_id>#{document.send("_id")}</_id>"
 					self.search_attributes.each do |key, value|
+						next if self.search_fields.include?(key)
 						value = case value
 							when 'bool'
 								document.send(key) ? 1 : 0
@@ -100,6 +106,7 @@ module Mongoid
 							else
 								document.send(key)
 						end
+						value = value.join(",") if value.class == [].class
 						puts "<#{key}>#{value.to_s.to_xs}</#{key}>"
 					end
 
