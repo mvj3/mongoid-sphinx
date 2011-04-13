@@ -1,8 +1,6 @@
-# MongoidSphinx
+# Mongoid Sphinx
 
-## Fork info
-
-This is a fork of http://github.com/burke/mongosphinx with many changes to simplify and support Mongoid.
+This version is not change Mongodb ObjectId style, so you will like it.
 
 ## General info
 
@@ -13,12 +11,13 @@ and some Sphinx configuration are needed to get going.
 
 ## Prerequisites
 
+This is only support for Rails 3 .
 MongoidSphinx needs gems Mongoid and Riddle as well as a running Sphinx
 and a MongoDB installation. Just add this to your Gemfile:
 
     gem riddle
     gem mongoid
-    gem mongoidsphinx, :require => 'mongoid_sphinx'
+    gem mongoid-sphinx-huacnlee, :require => 'mongoid_sphinx'
 
 No additional configuraton is needed for interfacing with MongoDB: Setup is
 done when Mongoid is able to talk to the MongoDB server.
