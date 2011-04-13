@@ -31,7 +31,7 @@ module Mongoid
         attribute_types = options[:attribute_types] || {}
         options[:attributes].each do |attrib|
           attr_type = attribute_types[attrib].to_s || self.fields[attrib.to_s].type.to_s
-          self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[attr_type] || 'str2ordinal'
+          self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[attr_type] || 'string'
         end
         MongoidSphinx.context.add_indexed_model self
       end
@@ -112,7 +112,7 @@ module Mongoid
       def search(query, options = {})
         client = MongoidSphinx::Configuration.instance.client
 
-        client.match_mode = options[:match_mode] || :extended
+        client.match_mode = options[:match_mode] || :all
         client.offset = options[:offset].to_i if options.key?(:offset)
         client.limit = options[:limit].to_i if options.key?(:limit)
         client.limit = options[:per_page].to_i if options.key?(:per_page)
