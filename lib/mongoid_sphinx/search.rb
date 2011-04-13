@@ -23,7 +23,7 @@ module MongoidSphinx
     alias :hits :matches
 
     def document_ids
-      @document_ids ||= matches.collect { |match| match[:doc] }
+      @document_ids ||= matches.collect { |match| match[:attributes]['_id'] }
     end
 
     def document_map

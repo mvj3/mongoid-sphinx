@@ -36,6 +36,10 @@ module Mongoid
         MongoidSphinx.context.add_indexed_model self
       end
 
+			def generate_id(created_at)
+				return created_at.to_i
+			end
+
       def internal_sphinx_index
         MongoidSphinx::Index.new(self)
       end
@@ -60,13 +64,14 @@ module Mongoid
         self.search_fields.each do |name|
           puts "<sphinx:field name=\"#{name}\"/>"
         end
+				puts "<sphinx:attr name=\"_id\" type=\"string\" />"
         self.search_attributes.each do |key, value|
           puts "<sphinx:attr name=\"#{key}\" type=\"#{value}\"/>"
         end
         puts '</sphinx:schema>'
 
         self.all.each do |document|
-          sphinx_compatible_id = document['_id'].to_s
+          sphinx_compatible_id = self.generate_id(document['created_at'])
 					puts "<sphinx:document id=\"#{sphinx_compatible_id}\">"
 
 					puts "<classname>#{self.to_s}</classname>"
@@ -75,6 +80,7 @@ module Mongoid
 							puts "<#{key}>#{document.send(key).to_s.to_xs}</#{key}>"
 						end
 					end
+					puts "<_id>#{document.send("_id")}</_id>"
 					self.search_attributes.each do |key, value|
 						value = case value
 							when 'bool'
