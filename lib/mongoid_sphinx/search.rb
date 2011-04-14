@@ -26,6 +26,22 @@ module MongoidSphinx
       @document_ids ||= matches.collect { |match| match[:attributes]['_id'] }
     end
 
+		# return result from attributes
+		def items
+			result = []
+			matches.each do |d|
+				h = {}
+				d[:attributes].each do |k,v|
+					# fix _id to id
+					k = "id" if k == "_id"
+					# convert to hash as sym
+					h[k.to_sym] = v
+				end
+				result << h
+			end
+			result
+		end
+
     def document_map
       @document_map = model.find(document_ids).inject({}) { |memo, d| memo[d.id.to_s] = d; memo }
     end
