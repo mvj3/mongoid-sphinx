@@ -33,7 +33,11 @@ module Mongoid
         self.index_options = options[:options] || {}
         attribute_types = options[:attribute_types] || {}
         options[:attributes].each do |attrib|
-          attr_type = attribute_types[attrib] || self.fields[attrib.to_s].type
+          attr_type = attribute_types[attrib] || (self.fields[attrib.to_s] == nil ? nil : self.fields[attrib.to_s].type)
+					if attr_type.blank?
+						puts "MONGOID SPHINX WARRING: #{attrib} skiped, it need to define type in :attribute_types when it not define in :fields."
+						next
+					end
           self.search_attributes[attrib] = SPHINX_TYPE_MAPPING[attr_type.to_s] || 'str2ordinal'
         end
         MongoidSphinx.context.add_indexed_model self
