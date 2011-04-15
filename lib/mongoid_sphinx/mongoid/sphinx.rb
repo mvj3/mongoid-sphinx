@@ -82,6 +82,7 @@ module Mongoid
           puts "<sphinx:field name=\"#{name}\"/>"
         end
 				puts "<sphinx:attr name=\"_id\" type=\"string\" />"
+				puts "<sphinx:attr name=\"classname\" type=\"string\" />"
         self.search_attributes.each do |key, value|
           puts "<sphinx:attr name=\"#{key}\" type=\"#{value}\" />"
         end
@@ -129,6 +130,9 @@ module Mongoid
         client.limit = options[:per_page].to_i if options.key?(:per_page)
         client.offset = (options[:page].to_i - 1) * client.limit if options[:page]
         client.max_matches = options[:max_matches].to_i if options.key?(:max_matches)
+        classes = options[:classes] || []
+        classes << self
+        class_indexes = classes.collect { |klass| "#{klass.to_s.downcase}_core" }.flatten.uniq
         client.set_anchor(*options[:geo_anchor]) if options.key?(:geo_anchor)
 
         if options.key?(:sort_by)
@@ -147,8 +151,8 @@ module Mongoid
             client.filters << Riddle::Client::Filter.new(key.to_s, value.is_a?(Range) ? value : value.to_a, true)
           end
         end
+        result = client.query query, class_indexes.join(',')
 
-        result = client.query("#{query} @classname #{self.to_s}")
         MongoidSphinx::Search.new(client, self, result)
       end
     end

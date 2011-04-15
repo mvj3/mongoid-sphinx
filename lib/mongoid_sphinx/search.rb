@@ -42,6 +42,10 @@ module MongoidSphinx
 			result
 		end
 
+    def groups
+      items.group_by { |item| item[:classname] }
+    end
+
     def document_map
       @document_map = model.find(document_ids).inject({}) { |memo, d| memo[d.id.to_s] = d; memo }
     end
@@ -67,7 +71,12 @@ module MongoidSphinx
     end
 
 		def to_a
-			model.find(ids)
+      result = []
+      groups.keys.each do |k|
+        gids = groups[k].collect { |item| item[:id] }
+        result += eval("#{k}.find(#{gids})")
+      end
+      result
 		end
 
 		def method_missing(method, *args, &block)
