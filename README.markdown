@@ -2,6 +2,8 @@
 
 This version is not change Mongodb ObjectId style, so you will like it.
 
+![Build status](https://secure.travis-ci.org/huacnlee/mongoid-sphinx.png?branch=master "Build status")
+
 ## General info
 
 The MongoidSphinx library implements an interface between MongoDB and Sphinx 
